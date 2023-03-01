@@ -8,10 +8,10 @@ Projeyi forklayın, clone'layın ve sıkça commitlemeyi unutmayın.
 
 ### Veritabanı
 
-Veritabanı projede kullanılmak üzere sizin için hazırlandı. 
+Veritabanı projede kullanılmak üzere sizin için hazırlandı.
 👉 Veriler, `npm run seed` çalıştırılarak herhangi bir zamanda sıfırlanabilir. 👈
 
-Öncelikle SQLite Studio(önerilir) gibi bir araç kullanarak veya VS Code'a SQLite Viewer extension'ını yükleyerek  `data/schemes.db3` dosyasını açın ve `schemes` ve `steps` tablolarındaki verileri inceleyin.
+Öncelikle SQLite Studio(önerilir) gibi bir araç kullanarak veya VS Code'a SQLite Viewer extension'ını yükleyerek `data/schemes.db3` dosyasını açın ve `schemes` ve `steps` tablolarındaki verileri inceleyin.
 
 ### API
 
@@ -86,3 +86,9 @@ Bu dosyanın içindeki talimatları izleyerek db erişim işlevlerini `api/schem
 - Gelir olarak ölçülen en iyi performans gösteren ilk 5 çalışanı bulun.
 - En az gelir getiren kategoriyi bulun.
 - En çok siparişi olan müşteri ülkesini bulun.
+
+2--
+SELECT EmployeeId,Count(EmployeeId) FROM [Orders] o
+group by EmployeeId
+order by Count(EmployeeId) desc
+3--

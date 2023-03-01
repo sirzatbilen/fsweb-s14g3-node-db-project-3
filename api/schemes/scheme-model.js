@@ -1,4 +1,7 @@
-function find() { // Egzersiz A
+const db = require("../../data/db-config");
+
+function find() {
+  // Egzersiz A
   /*
     1A- Aşağıdaki SQL sorgusunu SQLite Studio'da "data/schemes.db3" ile karşılaştırarak inceleyin.
     LEFT joini Inner joine çevirirsek ne olur?
@@ -15,9 +18,17 @@ function find() { // Egzersiz A
     2A- Sorguyu kavradığınızda devam edin ve onu Knex'te oluşturun.
     Bu işlevden elde edilen veri kümesini döndürün.
   */
+
+  return db("schemes as sc")
+    .leftJoin("steps as st", "sc.scheme_id", "st.scheme_id")
+    .select("sc.*")
+    .count("st.step_id as number_of_steps")
+    .groupBy("sc.scheme_id")
+    .orderBy("sc.scheme_id");
 }
 
-function findById(scheme_id) { // Egzersiz B
+async function findById(scheme_id) {
+  // Egzersiz B
   /*
     1B- Aşağıdaki SQL sorgusunu SQLite Studio'da "data/schemes.db3" ile karşılaştırarak inceleyin:
 
@@ -83,9 +94,37 @@ function findById(scheme_id) { // Egzersiz B
         "steps": []
       }
   */
+
+  const records = await db("schemes as sc")
+    .leftJoin("steps as st", "sc.scheme_id", "st.scheme_id")
+    .select("sc.scheme_name", "st.*")
+    .where("sc.scheme_id", scheme_id)
+    .orderBy("st.step_number", "ASC");
+
+  const result = {
+    scheme_id: records[0].scheme_id,
+    scheme_name: records[0].scheme_name,
+    steps: [],
+  };
+  records.forEach((item) => {
+    item.step_id &&
+      result.steps.push({
+        step_id: item.step_id,
+        step_number: item.step_number,
+        instructions: item.instructions,
+      });
+  });
+  return result;
 }
 
-function findSteps(scheme_id) { // Egzersiz C
+async function findSteps(scheme_id) {
+  const records = await db("schemes as sc")
+    .leftJoin("steps as st", "sc.scheme_id", "st.scheme_id")
+    .select("st.*", "sc.scheme_name")
+    .where("sc.scheme_id", scheme_id)
+    .orderBy("st.step_number", "ASC");
+  return !records[0].step_id ? [] : records;
+  // Egzersiz C
   /*
     1C- Knex'te aşağıdaki verileri döndüren bir sorgu oluşturun.
     Adımlar, adım_numarası'na göre sıralanmalıdır ve dizi
@@ -108,18 +147,25 @@ function findSteps(scheme_id) { // Egzersiz C
   */
 }
 
-function add(scheme) { // Egzersiz D
+async function add(scheme) {
+  // Egzersiz D
   /*
     1D- Bu işlev yeni bir şema oluşturur ve _yeni oluşturulan şemaya çözümlenir.
   */
+  const newSchema = await db("schemes").insert(scheme);
+  return db("schemes").where("scheme_id", newSchema).first();
 }
 
-function addStep(scheme_id, step) { // EXERCISE E
+async function addStep(scheme_id, step) {
+  // EXERCISE E
   /*
     1E- Bu işlev, verilen 'scheme_id' ile şemaya bir adım ekler.
     ve verilen "scheme_id"ye ait _tüm adımları_ çözer,
     yeni oluşturulan dahil.
   */
+
+  await db("steps").insert({ ...step, scheme_id });
+  return findSteps(scheme_id);
 }
 
 module.exports = {
@@ -128,4 +174,4 @@ module.exports = {
   findSteps,
   add,
   addStep,
-}
+};
